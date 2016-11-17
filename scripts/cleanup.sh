@@ -7,7 +7,7 @@ yum -C -y autoremove ansible
 package-cleanup -C -y --oldkernels --count=1
 
 # Clean yum cache
-yum clean all
+rm -rf /var/cache/yum/*
 
 # Zero out the rest of the free space using dd, then delete the written file.
 dd if=/dev/zero of=/EMPTY bs=1M
