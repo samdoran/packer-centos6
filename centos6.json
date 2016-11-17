@@ -1,0 +1,59 @@
+{
+  "variables": {
+    "rhn_username": "{{ env `RHN_USERNAME` }}",
+    "rhn_password": "{{ env `RHN_PASSWORD` }}"
+  },
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/install-ansible.sh"
+    },
+    {
+      "type": "ansible-local",
+      "role_paths": [ "ansible/roles/packer-rhel" ],
+      "playbook_file": "ansible/provision.yml"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E '{{.Path}}'",
+      "inline": [ "/sbin/reboot", "sleep 60"]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "scripts/cleanup.sh"
+    }
+  ],
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kickstart.cfg<enter><wait>"
+      ],
+      "boot_wait": "5s",
+      "disk_size": 81920,
+      "guest_os_type": "RedHat_64",
+      "headless": false,
+      "http_directory": "http",
+      "iso_url": "iso/CentOS-6.8-x86_64-minimal.iso",
+      "iso_checksum": "ec49c297d484b9da0787e5944edc38f7c70f21c0f6a60178d8e9a8926d1949f4",
+      "iso_checksum_type": "sha256",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "shutdown_command": "echo 'vagrant' | sudo -S shutdown -P now",
+      "output_directory": "boxes",
+      "vm_name": "packer-centos6-x86_64",
+      "vboxmanage": [
+        [ "modifyvm", "{{ .Name }}", "--memory", "512" ],
+        [ "modifyvm", "{{ .Name }}", "--cpus", "1" ]
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "builds/{{ .Provider }}-centos6.box",
+      "type": "vagrant"
+    }
+  ]
+}
