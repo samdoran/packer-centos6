@@ -5,27 +5,27 @@
   },
   "provisioners": [
     {
+      "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
-      "script": "scripts/install-ansible.sh",
-      "type": "shell"
+      "script": "scripts/install-ansible.sh"
     },
     {
+      "type": "ansible-local",
       "playbook_file": "ansible/provision.yml",
       "role_paths": [
         "ansible/roles/packer-rhel"
-      ],
-      "type": "ansible-local"
+      ]
     },
     {
+      "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E '{{.Path}}'",
       "inline": [ "/sbin/reboot", "sleep 30" ],
-      "type": "shell",
       "expect_disconnect": true
     },
     {
+      "type": "shell",
       "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
       "script": "scripts/cleanup.sh",
-      "type": "shell",
       "pause_before": "30s"
     }
   ],
